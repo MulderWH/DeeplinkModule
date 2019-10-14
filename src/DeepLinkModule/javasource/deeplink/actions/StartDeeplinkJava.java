@@ -283,8 +283,14 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			
 			Core.commit(sessionContext, link.getMendixObject());
 			
-			//finally, redirect
-			response.setStatus(IMxRuntimeResponse.SEE_OTHER);
+			//Use the PUT verb for headless requests to deeplink (for hybrid mobile)
+			//200 if PUT
+			//redirect if not
+			if (request.getHttpServletRequest().getMethod() == "PUT") {
+				response.setStatus(IMxRuntimeResponse.OK);
+			} else {
+				response.setStatus(IMxRuntimeResponse.SEE_OTHER);
+			}
 			
 			String location = emptyStringToNull(deeplink.getIndexPage());
 			if (location == null)
@@ -346,6 +352,12 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			if (qs != null && !qs.equals("")) {
 			    qs = URLDecoder.decode(qs, "UTF-8");
 			    url = url + "?" + URLEncoder.encode(qs, "UTF-8");
+			}
+			
+			//Use the PUT verb for headless requests to deeplink (for hybrid mobile)
+			if (request.getHttpServletRequest().getMethod() == "PUT") {
+				response.setStatus(IMxRuntimeResponse.UNAUTHORIZED);
+				return;
 			}
 				
 			//use alternative login?
